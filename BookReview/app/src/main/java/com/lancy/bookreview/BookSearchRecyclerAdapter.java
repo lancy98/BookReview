@@ -19,47 +19,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class BookSearchRecyclerAdapter
-        extends RecyclerView.Adapter<BookSearchRecyclerAdapter.ViewHolder>
-        implements Filterable {
+        extends RecyclerView.Adapter<BookSearchRecyclerAdapter.ViewHolder> {
 
     private ArrayList<Book> books;
     private BookList bookList;
     private Context context;
     private RecyclerViewSelection selection;
-
-    private Filter bookFilter = new Filter() {
-        @Override
-        protected FilterResults performFiltering(CharSequence constraint) {
-//            ArrayList<Country> filteredCountries = new ArrayList<Country>();
-
-//            if (constraint == null || constraint.length() == 0) {
-//                filteredCountries.addAll(itemsFull);
-//            } else {
-//                String filterPattern = constraint.toString().toLowerCase().trim();
-//
-//                for (Country country: itemsFull) {
-//                    if (country.name.toLowerCase().contains(filterPattern)) {
-//                        filteredCountries.add(country);
-//                    }
-//                }
-//            }
-//
-//            FilterResults results = new FilterResults();
-//            results.values = filteredCountries;
-            ArrayList<String> arrayList = new ArrayList<String>();
-
-            FilterResults results = new FilterResults();
-            results.values = arrayList;
-            return results;
-        }
-
-        @Override
-        protected void publishResults(CharSequence constraint, FilterResults results) {
-//            items.clear();
-//            items.addAll((List) results.values);
-            notifyDataSetChanged();
-        }
-    };
 
     public BookSearchRecyclerAdapter(Context context,
                                      BookList bookList,
@@ -95,26 +60,14 @@ public class BookSearchRecyclerAdapter
         final Book book = books.get(i);
 
         viewHolder.bookNameTextView.setText(book.mName);
+        Picasso.get().load(book.mImageLink).into(viewHolder.bookImageView);
 
-//        try {
-//            InputStream ims = context.getAssets().open("imagePlaceholder.png");
-//            Drawable drawable = Drawable.createFromStream(ims, null);
-
-//            String imageURL = "https://www.countryflags.io/" + country.identification + "/shiny/64.png";
-//            Picasso.get().load(imageURL).placeholder(drawable).into(viewHolder.imageView);
-        Log.i("Lancy", book.mImageLink);
-            Picasso.get().load(book.mImageLink).into(viewHolder.bookImageView);
-//        }
-//        catch(IOException ex) {
-//            return;
-//        }
-//
-//        viewHolder.view.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                selection.selected(country);
-//            }
-//        });
+        viewHolder.view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selection.selected(book);
+            }
+        });
 
     }
 
@@ -136,10 +89,5 @@ public class BookSearchRecyclerAdapter
 
     public interface RecyclerViewSelection {
         public void selected(Book book);
-    }
-
-    @Override
-    public Filter getFilter() {
-        return bookFilter;
     }
 }

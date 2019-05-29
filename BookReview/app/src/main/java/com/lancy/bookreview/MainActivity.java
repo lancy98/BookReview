@@ -41,7 +41,6 @@ public class MainActivity extends AppCompatActivity
         implements BookSearchRecyclerAdapter.RecyclerViewSelection,
         NetworkRequest.NetworkResponse, BookList.BookListParsingCallback {
 
-    private FirebaseAuth mAuth;
     private BookSearchRecyclerAdapter mBookSearchRecyclerAdapter;
     private NetworkRequest mNetworkRequest;
     private BookList mBookList;
@@ -49,14 +48,10 @@ public class MainActivity extends AppCompatActivity
     private ProgressBar mProgressBar;
     private static final int Image_Capture_Code = 1001;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        // Initialize Firebase Auth
-        mAuth = FirebaseAuth.getInstance();
 
         mProgressBar = findViewById(R.id.progressBar);
 
@@ -70,23 +65,6 @@ public class MainActivity extends AppCompatActivity
                 return true;
             }
         });
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        /*
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-
-        if (currentUser == null) {
-            Intent intent = new Intent(MainActivity.this, RegistrationActivity.class);
-            startActivity(intent);
-            finish();
-        } else {
-            Log.d(RegistrationActivity.TAG, "You have successfully regisered.");
-        }
-        */
     }
 
     @Override
@@ -150,13 +128,15 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void selected(Book book) {
-
+        Intent bookDetailIntent = new Intent(MainActivity.this, BookDetailActivity.class);
+        bookDetailIntent.putExtra("book", book);
+        startActivity(bookDetailIntent);
     }
 
     @Override
     public void networkResponse(String url, String responseString, VolleyError error) {
         mBookList = new BookList();
-        mBookList.parseXML(responseString, this);
+        mBookList.parseBooksXML(responseString, this);
     }
 
     @Override

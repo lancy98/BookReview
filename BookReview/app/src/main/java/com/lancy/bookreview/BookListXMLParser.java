@@ -3,16 +3,10 @@ package com.lancy.bookreview;
 import android.util.Log;
 import android.util.Xml;
 
-import com.google.android.gms.common.util.IOUtils;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.ArrayList;
 

@@ -7,11 +7,10 @@ public class BookList implements BookListXMLParser.BookListXMLParserCompletion {
     private BookListXMLParser mBookListXMLParser;
     private BookListParsingCallback mCallback;
 
-    public void parseXML(String xmlString, BookListParsingCallback callbackHandler) {
+    public void parseBooksXML(String xmlString, BookListParsingCallback callbackHandler) {
         mCallback = callbackHandler;
         constructBookListFromXMLString(xmlString);
     }
-
 
     public void constructBookListFromXMLString(String xmlString) {
         mBookListXMLParser = new BookListXMLParser(xmlString, this);
