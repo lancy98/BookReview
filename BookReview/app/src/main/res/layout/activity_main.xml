@@ -52,12 +52,13 @@
         android:id="@+id/cameraImageButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/ic_camera"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="10dp"
         android:background="@drawable/search_button"
+        android:onClick="cameraButtonTapped"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="5dp"
-        android:layout_marginEnd="10dp" />
+        app:srcCompat="@drawable/ic_camera" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/bookSearchRecyclerView"

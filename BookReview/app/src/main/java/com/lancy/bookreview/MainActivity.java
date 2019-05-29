@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.os.Looper;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -46,6 +47,7 @@ public class MainActivity extends AppCompatActivity
     private BookList mBookList;
     private EditText mEditText;
     private ProgressBar mProgressBar;
+    private static final int Image_Capture_Code = 1001;
 
 
     @Override
@@ -102,15 +104,16 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    public void loginButtonTapped(View view) {
-
+    public void cameraButtonTapped(View view) {
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(cameraIntent, Image_Capture_Code);
     }
 
     public void searchButtonTapped(View view) {
         loadBooks(mEditText.getText().toString());
     }
 
-    private void convertImageToText(Bitmap bitmap) {
+    private void convertImageToTextAndLoadBooks(Bitmap bitmap) {
         FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmap);
 
         FirebaseVisionTextRecognizer detector = FirebaseVision.getInstance()
@@ -171,7 +174,15 @@ public class MainActivity extends AppCompatActivity
         UserInterfaceHelper.enableUserInteraction(this);
     }
 
-    public void onEditorAction(TextView textView, int actionId, KeyEvent event) {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
+        if (requestCode == Image_Capture_Code) {
+            if (resultCode == RESULT_OK) {
+                Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+                convertImageToTextAndLoadBooks(bitmap);
+            }
+        }
     }
 }
