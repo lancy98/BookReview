@@ -16,6 +16,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import java.util.HashMap;
 
@@ -57,22 +59,35 @@ public class RegistrationActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "createUserWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-
-                            HashMap<String, Object> result = new HashMap<>();
-                            result.put("username", username);
-                            result.put("region", region);
-
-                            mDatabase.child("user")
-                                    .child(user.getUid())
-                                    .setValue(result).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            FirebaseInstanceId.getInstance().getInstanceId()
+                                    .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
                                 @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        finish();
-                                    } else {
-
+                                public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                                    if (!task.isSuccessful()) {
+                                        Log.w(TAG, "getInstanceId failed", task.getException());
+                                        return;
                                     }
+
+                                    // Get new Instance ID token
+                                    String token = task.getResult().getToken();
+
+                                    HashMap<String, Object> result = new HashMap<>();
+                                    result.put("username", username);
+                                    result.put("region", region);
+                                    result.put("token", token);
+
+                                    mDatabase.child("user")
+                                            .child(mAuth.getCurrentUser().getUid())
+                                            .setValue(result).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                finish();
+                                            } else {
+
+                                            }
+                                        }
+                                    });
                                 }
                             });
                         } else {

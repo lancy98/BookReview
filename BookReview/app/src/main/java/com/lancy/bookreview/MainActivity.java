@@ -37,7 +37,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.net.URLEncoder;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends ProgressActivity
         implements BookSearchRecyclerAdapter.RecyclerViewSelection,
         NetworkRequest.NetworkResponse, BookList.BookListParsingCallback {
 
@@ -45,7 +45,6 @@ public class MainActivity extends AppCompatActivity
     private NetworkRequest mNetworkRequest;
     private BookList mBookList;
     private EditText mEditText;
-    private ProgressBar mProgressBar;
     private static final int Image_Capture_Code = 1001;
 
     @Override
@@ -117,8 +116,7 @@ public class MainActivity extends AppCompatActivity
             return;
         }
 
-        mProgressBar.setVisibility(View.VISIBLE);
-        UserInterfaceHelper.disableUserInteraction(this);
+        showProgressUI();
 
         searchText = searchText.replace(" ", "%20");
         String url = "https://www.goodreads.com/search/index.xml?key=RP1SC8DhEPLIxNC1NwA9g&q=" + searchText;
@@ -150,8 +148,7 @@ public class MainActivity extends AppCompatActivity
         mBookSearchRecyclerAdapter = new BookSearchRecyclerAdapter(this, mBookList, this);
         countryRecyclerView.setAdapter(mBookSearchRecyclerAdapter);
 
-        mProgressBar.setVisibility(View.GONE);
-        UserInterfaceHelper.enableUserInteraction(this);
+        hideProgressUI();
     }
 
     @Override

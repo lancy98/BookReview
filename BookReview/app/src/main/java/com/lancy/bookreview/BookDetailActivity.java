@@ -1,5 +1,6 @@
 package com.lancy.bookreview;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -12,18 +13,23 @@ import android.widget.TextView;
 import com.android.volley.VolleyError;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-public class BookDetailActivity extends AppCompatActivity
+public class BookDetailActivity extends ProgressActivity
         implements NetworkRequest.NetworkResponse, BookDetailsXMLParser.BookDetailsXMLParserCompletion {
 
     private FirebaseAuth mAuth;
     private Button mBottomLeftButton;
     private Button mBottomRightButton;
     private Book mBook;
-    private ProgressBar mProgressBar;
     private NetworkRequest mNetworkRequest;
     private BookDetailsXMLParser mBookDetailsXMLParser;
     private TextView mBookDescriptionTextView;
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,11 +45,8 @@ public class BookDetailActivity extends AppCompatActivity
         mBook = getIntent().getExtras().getParcelable("book");
 
         loadBookInformation();
-    }
 
-    @Override
-    public void onStart() {
-        super.onStart();
+        mBottomRightButton.setVisibility(View.VISIBLE);
 
         if (hasUserLoggedIn()) {
             mBottomLeftButton.setText("Wishlist");
@@ -95,6 +98,7 @@ public class BookDetailActivity extends AppCompatActivity
     public void parsingCompleted(boolean success, String errorString) {
         if (success) {
             mBookDescriptionTextView.setText(mBook.mDescription);
+            CheckIfTheUserAlreadySellingThisBook();
         }
         hideProgressUI();
     }
@@ -103,13 +107,23 @@ public class BookDetailActivity extends AppCompatActivity
         return (mAuth.getCurrentUser() != null);
     }
 
-    private void showProgressUI() {
-        mProgressBar.setVisibility(View.VISIBLE);
-        UserInterfaceHelper.disableUserInteraction(this);
-    }
+    private void CheckIfTheUserAlreadySellingThisBook() {
+        if (!hasUserLoggedIn()) {
+            return;
+        }
 
-    private void hideProgressUI() {
-        mProgressBar.setVisibility(View.GONE);
-        UserInterfaceHelper.enableUserInteraction(this);
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        String userUID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        mDatabase.child("sell").child(mBook.mISBN).child(userUID).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String value = dataSnapshot.getValue(String.class);
+                mBottomRightButton.setVisibility((value != null) ? View.GONE: View.VISIBLE);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        });
     }
 }
