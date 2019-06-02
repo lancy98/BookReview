@@ -52,7 +52,7 @@ public class BookSellingActivity extends ProgressActivity {
     private void loadDataIntoUI() {
         Picasso.get().load(mBook.mImageLink).into(mBookImageView);
         mBookNameTextView.setText(mBook.mName);
-        mAuthorNameTextView.setText(mBook.mAuthorName);
+        mAuthorNameTextView.setText("by " + mBook.mAuthorName);
     }
 
     private void getUIComponentsReferences() {

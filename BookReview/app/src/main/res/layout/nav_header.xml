@@ -8,21 +8,24 @@
     android:layout_height="176dp">
 
     <ImageView
+        android:id="@+id/userIconImageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@mipmap/ic_launcher_round"/>
+        android:src="@drawable/ic_person"/>
     
     <TextView
+        android:id="@+id/usernameTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingTop="8dp"
-        android:text="username"
+        android:text="Sign In"
         android:textColor="@color/colorTextAndIcon"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"/>
+
     <TextView
+        android:id="@+id/emailIDTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/colorTextAndIcon"
-        android:text="info@gmail.com"/>
+        android:textColor="@color/colorTextAndIcon" />
 
 </LinearLayout>

@@ -8,25 +8,35 @@
 
     <Button
         android:id="@+id/bottomLeftButton"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
+        android:layout_marginEnd="16dp"
         android:layout_marginBottom="32dp"
+        android:background="@color/colorPrimary"
         android:onClick="bottomLeftButtonTapped"
         android:text="Button"
+        android:textColor="@color/colorTextAndIcon"
+        android:textSize="15sp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/bottomRightButton"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/bottomRightButton"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="32dp"
+        android:background="@color/colorPrimary"
         android:onClick="bottomRightButtonTapped"
         android:text="Button"
+        android:textColor="@color/colorTextAndIcon"
+        android:textSize="15sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/bottomLeftButton" />
 
     <TextView
         android:id="@+id/bookDescriptionTextView"
@@ -36,6 +46,7 @@
         android:layout_marginTop="24dp"
         android:layout_marginEnd="24dp"
         android:text="TextView"
+        android:maxLines="5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

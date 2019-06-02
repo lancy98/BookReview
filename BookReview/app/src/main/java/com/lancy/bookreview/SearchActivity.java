@@ -45,14 +45,12 @@ public class SearchActivity extends Fragment
     private BookList mBookList;
     private EditText mEditText;
     private static final int Image_Capture_Code = 1001;
-    protected ProgressBar mProgressBar;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_search, container, false);
 
-        mProgressBar = view.findViewById(R.id.progressBar);
         countryRecyclerView = view.findViewById(R.id.bookSearchRecyclerView);
         mEditText = view.findViewById(R.id.editText);
         mEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -66,15 +64,6 @@ public class SearchActivity extends Fragment
         });
 
         return view;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.main_logout_button) {
-            FirebaseAuth.getInstance().signOut();
-        }
-
-        return true;
     }
 
     public void cameraButtonTapped(View view) {
@@ -112,7 +101,7 @@ public class SearchActivity extends Fragment
             return;
         }
 
-        showProgressUI();
+        ((MainActivity) getActivity()).showProgressUI();
 
         searchText = searchText.replace(" ", "%20");
         String url = "https://www.goodreads.com/search/index.xml?key=RP1SC8DhEPLIxNC1NwA9g&q=" + searchText;
@@ -143,7 +132,7 @@ public class SearchActivity extends Fragment
         mBookSearchRecyclerAdapter = new BookSearchRecyclerAdapter(getActivity(), mBookList, this);
         countryRecyclerView.setAdapter(mBookSearchRecyclerAdapter);
 
-        hideProgressUI();
+        ((MainActivity) getActivity()).hideProgressUI();
     }
 
     @Override
@@ -156,15 +145,5 @@ public class SearchActivity extends Fragment
                 convertImageToTextAndLoadBooks(bitmap);
             }
         }
-    }
-
-    protected void showProgressUI() {
-        mProgressBar.setVisibility(View.VISIBLE);
-        UserInterfaceHelper.disableUserInteraction(getActivity());
-    }
-
-    protected void hideProgressUI() {
-        mProgressBar.setVisibility(View.GONE);
-        UserInterfaceHelper.enableUserInteraction(getActivity());
     }
 }

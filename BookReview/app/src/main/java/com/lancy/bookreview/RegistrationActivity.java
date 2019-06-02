@@ -50,7 +50,10 @@ public class RegistrationActivity extends AppCompatActivity {
         final String region = regionTextInputLayout.getEditText().getText().toString();
 
         int index = email.indexOf('@');
-        final String username = email.substring(0,index);
+        String username = email.substring(0, index);
+        username = username.substring(0, 1).toUpperCase() + username.substring(1);
+
+        final String user = username;
 
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -72,7 +75,7 @@ public class RegistrationActivity extends AppCompatActivity {
                                     String token = task.getResult().getToken();
 
                                     HashMap<String, Object> result = new HashMap<>();
-                                    result.put("username", username);
+                                    result.put("username", user);
                                     result.put("region", region);
                                     result.put("token", token);
 
