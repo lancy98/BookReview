@@ -1,15 +1,19 @@
 package com.lancy.bookreview;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +28,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class BookSellingActivity extends ProgressActivity {
     private DatabaseReference mDatabase;
@@ -37,7 +42,6 @@ public class BookSellingActivity extends ProgressActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_selling);
-
         mBook = getIntent().getExtras().getParcelable("book");
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
@@ -78,8 +82,13 @@ public class BookSellingActivity extends ProgressActivity {
     }
 
     private void updateSellDatabase() {
-        mDatabase.child("sell").child(mBook.mISBN)
-                .child(userID()).setValue(sellingPrice()).addOnCompleteListener(new OnCompleteListener<Void>() {
+        Map sellingInfo = new HashMap();
+        sellingInfo.put("bookPrice", sellingPrice());
+        sellingInfo.put("bookName", mBook.mName);
+        sellingInfo.put("sellerUserID", userID());
+
+        mDatabase.child("sell").child(mBook.mISBN).push()
+                .setValue(sellingInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
@@ -99,56 +108,13 @@ public class BookSellingActivity extends ProgressActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    fetchUsersInterestedInTheBook();
+                    showToast("Database updated sucess");
                 } else {
-                    hideProgressUI();
                     showToast("There was problem with the server");
                 }
-            }
-        });
-    }
 
-    private void fetchUsersInterestedInTheBook() {
-        mDatabase.child("wishlist").child(mBook.mISBN).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for(DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    String userKey = snapshot.getKey();
-                    updateNotificationDatabase(userKey);
-                }
+                hideProgressUI();
                 finish();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                hideProgressUI();
-                showToast("There was problem with the server");
-            }
-        });
-    }
-
-
-    private void updateNotificationDatabase(String toUserID) {
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        String price = mPriceEditText.getText().toString();
-
-        HashMap<String, String> data = new HashMap<>();
-        data.put("from", userId);
-        data.put("to", toUserID);
-        data.put("bookName", mBook.mName);
-        data.put("price", price);
-
-        mDatabase.child("notifications").push().setValue(data)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                hideProgressUI();
-
-                if (task.isSuccessful()) {
-                    showToast("succesfully notified user");
-                } else {
-                    showToast("There was problem with the server");
-                }
             }
         });
     }

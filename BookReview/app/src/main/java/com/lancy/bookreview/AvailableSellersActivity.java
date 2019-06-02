@@ -1,12 +1,11 @@
 package com.lancy.bookreview;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -19,21 +18,21 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class AvailableSellersActivity extends ProgressActivity
-        implements SellerRecyclerAdapter.RecyclerViewSelection{
+        implements SellerRecyclerAdapter.RecyclerViewSelection {
+    private RecyclerView sellersRecyclerView;
     private DatabaseReference mDatabase;
     private Book mBook;
-    private ArrayList<Seller> availableSellers = new ArrayList<>();
+    private ArrayList<BookSeller> availableSellers = new ArrayList<>();
     private SellerRecyclerAdapter sellerRecyclerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_available_sellers);
-
         mProgressBar = findViewById(R.id.progressBar);
+        sellersRecyclerView = findViewById(R.id.sellersRecyclerView);
         mBook = getIntent().getExtras().getParcelable("book");
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
@@ -52,16 +51,13 @@ public class AvailableSellersActivity extends ProgressActivity
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            mDatabase.child("sell").child(mBook.mISBN).addValueEventListener(new ValueEventListener() {
+                            mDatabase.child("sell").child(mBook.mISBN)
+                                    .addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    // iterate through the sellers.
                                     for(DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                        String userKey = snapshot.getKey();
-                                        String price = snapshot.getValue().toString();
-
-                                        final Seller seller = new Seller();
-                                        seller.identification = userKey;
-                                        seller.sellingPrice = price;
+                                        BookSeller seller = snapshot.getValue(BookSeller.class);
                                         availableSellers.add(seller);
                                     }
 
@@ -87,45 +83,11 @@ public class AvailableSellersActivity extends ProgressActivity
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            updateSellersUsername();
                         } else {
-                            sellerInformationFetched();
                         }
-                    }
-                });
-    }
-
-    private void updateSellersUsername() {
-        if (availableSellers.size() == 0) {
-            sellerInformationFetched();
-            return;
-        }
-
-        for (Seller seller: availableSellers) {
-            final Seller currentSeller = seller;
-            mDatabase.child("user").child(seller.identification).child("username")
-                    .addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    String value = dataSnapshot.getValue(String.class);
-                    if (value != null) {
-                        currentSeller.name = value;
-
-                        Seller lastSeller = availableSellers.get(availableSellers.size()-1);
-                        if (lastSeller.identification.equals(currentSeller.identification)) {
-                            sellerInformationFetched();
-                        }
-                    } else {
                         sellerInformationFetched();
                     }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-                    sellerInformationFetched();
-                }
-            });
-        }
+                });
     }
 
     private void sellerInformationFetched() {
@@ -134,7 +96,6 @@ public class AvailableSellersActivity extends ProgressActivity
     }
 
     private void configureRecyclerView() {
-        RecyclerView sellersRecyclerView = findViewById(R.id.sellersRecyclerView);
         sellersRecyclerView.setHasFixedSize(true);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -149,7 +110,12 @@ public class AvailableSellersActivity extends ProgressActivity
     }
 
     @Override
-    public void selected(Seller seller) {
+    public void selected(BookSeller seller) {
+        Intent chatActivityIntent = new Intent(this, ChatActivity.class);
 
+        chatActivityIntent.putExtra("book", mBook);
+        chatActivityIntent.putExtra("seller", seller);
+
+        startActivity(chatActivityIntent);
     }
 }

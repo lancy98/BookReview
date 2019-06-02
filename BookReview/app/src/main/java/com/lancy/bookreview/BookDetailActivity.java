@@ -1,11 +1,15 @@
 package com.lancy.bookreview;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.PersistableBundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -59,22 +63,22 @@ public class BookDetailActivity extends ProgressActivity
 
     public void bottomLeftButtonTapped(View view) {
         if (hasUserLoggedIn()) {
-            Intent availableSellersActivity = new Intent(BookDetailActivity.this, AvailableSellersActivity.class);
+            Intent availableSellersActivity = new Intent(this, AvailableSellersActivity.class);
             availableSellersActivity.putExtra("book", mBook);
             startActivity(availableSellersActivity);
         } else {
-            Intent signInIntent = new Intent(BookDetailActivity.this, LoginActivity.class);
+            Intent signInIntent = new Intent(this, LoginActivity.class);
             startActivity(signInIntent);
         }
     }
 
     public void bottomRightButtonTapped(View view) {
         if (hasUserLoggedIn()) {
-            Intent bookSellingActivity = new Intent(BookDetailActivity.this, BookSellingActivity.class);
+            Intent bookSellingActivity = new Intent(this, BookSellingActivity.class);
             bookSellingActivity.putExtra("book", mBook);
             startActivity(bookSellingActivity);
         } else {
-            Intent registrationIntent = new Intent(BookDetailActivity.this, RegistrationActivity.class);
+            Intent registrationIntent = new Intent(this, RegistrationActivity.class);
             startActivity(registrationIntent);
         }
     }

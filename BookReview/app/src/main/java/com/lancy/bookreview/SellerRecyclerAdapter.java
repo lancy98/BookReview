@@ -15,12 +15,12 @@ import java.util.ArrayList;
 public class SellerRecyclerAdapter
         extends RecyclerView.Adapter<SellerRecyclerAdapter.ViewHolder> {
 
-    private ArrayList<Seller> sellers;
+    private ArrayList<BookSeller> sellers;
     private Context context;
     private RecyclerViewSelection selection;
 
     public SellerRecyclerAdapter(Context context,
-                                 ArrayList<Seller> sellers,
+                                 ArrayList<BookSeller> sellers,
                                  SellerRecyclerAdapter.RecyclerViewSelection handler) {
         this.sellers = sellers;
         this.context = context;
@@ -49,15 +49,15 @@ public class SellerRecyclerAdapter
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-        final Seller seller = sellers.get(i);
+        final BookSeller bookSeller = sellers.get(i);
 
-        viewHolder.sellerUsernameTextView.setText(seller.name);
-        viewHolder.sellingPricingTextView.setText("Selling Price: " + seller.sellingPrice);
+        viewHolder.sellerUsernameTextView.setText(bookSeller.sellerName);
+        viewHolder.sellingPricingTextView.setText("Selling Price: " + bookSeller.bookPrice);
 
         viewHolder.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                selection.selected(seller);
+                selection.selected(bookSeller);
             }
         });
 
@@ -83,6 +83,6 @@ public class SellerRecyclerAdapter
     }
 
     public interface RecyclerViewSelection {
-        public void selected(Seller seller);
+        public void selected(BookSeller seller);
     }
 }
