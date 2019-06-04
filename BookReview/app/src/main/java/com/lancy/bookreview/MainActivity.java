@@ -1,11 +1,15 @@
 package com.lancy.bookreview;
 
 import android.app.Activity;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -14,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -21,6 +26,14 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -28,6 +41,8 @@ public class MainActivity extends AppCompatActivity
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private LinearLayout linearHeaderProgress;
+    private DatabaseReference userDatabaseReference;
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,9 +71,22 @@ public class MainActivity extends AppCompatActivity
 
         updateUserInfo();
 
+        View headerView = navigationView.getHeaderView(0);
+        headerView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openFragment(new AccountInformationFragment());
+                drawerLayout.closeDrawer(Gravity.LEFT, true);
+            }
+        });
+
         if (savedInstanceState == null) {
             openSearchFragment();
         }
+
+        getUserDatabaseReference();
+        getUserData();
+        getUserImage();
     }
 
     @Override
@@ -103,17 +131,9 @@ public class MainActivity extends AppCompatActivity
         TextView userNameTextView = headerView.findViewById(R.id.usernameTextView);
         TextView emailTextView = headerView.findViewById(R.id.emailIDTextView);
 
-        if (userLoggedIn()) {
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-            String emailID = user.getEmail();
-            int index = emailID.indexOf('@');
-
-            String username = emailID.substring(0, index);
-            username = username.substring(0, 1).toUpperCase() + username.substring(1);
-
-            userNameTextView.setText(username);
-            emailTextView.setText(emailID);
+        if (userLoggedIn() && user != null) {
+            userNameTextView.setText(user.username);
+            emailTextView.setText(user.email);
         } else {
             userNameTextView.setText("Sign In");
             emailTextView.setText("");
@@ -129,6 +149,51 @@ public class MainActivity extends AppCompatActivity
         FirebaseAuth.getInstance().signOut();
         updateLoginLogoutButton();
         updateUserInfo();
+    }
+
+    private FirebaseUser firebaseUser() {
+        return FirebaseAuth.getInstance().getCurrentUser();
+    }
+
+    private void getUserDatabaseReference() {
+        userDatabaseReference = FirebaseDatabase.getInstance().getReference().child("user").child(firebaseUser().getUid());
+    }
+
+    private void getUserImage() {
+        userDatabaseReference.child("image").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String imagePath = dataSnapshot.getValue(String.class);
+                if (imagePath != null) {
+                    View headerView = navigationView.getHeaderView(0);
+                    CircleImageView imageView = headerView.findViewById(R.id.profileImageView);
+                    Drawable drawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_person, null);
+                    Picasso.get().load(imagePath)
+                            .placeholder(drawable)
+                            .fit()
+                            .centerCrop()
+                            .into(imageView);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void getUserData() {
+        userDatabaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                user = dataSnapshot.getValue(User.class);
+                updateUserInfo();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) { }
+        });
     }
 
     public void openSearchFragment() {

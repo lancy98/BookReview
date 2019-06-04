@@ -29,6 +29,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-database:17.0.0'
     implementation 'com.google.firebase:firebase-messaging:18.0.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.google.firebase:firebase-storage:17.0.0'
     testImplementation 'junit:junit:4.13-beta-3'
     androidTestImplementation 'androidx.test:runner:1.2.0-beta01'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0-beta01'
@@ -37,6 +38,8 @@ dependencies {
     implementation 'com.android.support:design:28.0.0'
     implementation 'com.android.volley:dc-volley:1.1.0'
     implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'de.hdodenhof:circleimageview:3.0.0'
+    implementation 'com.github.jrvansuita:PickImage:2.2.4'
 }
 
 apply plugin: 'com.google.gms.google-services'

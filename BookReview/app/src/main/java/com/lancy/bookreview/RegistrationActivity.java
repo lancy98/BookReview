@@ -45,7 +45,7 @@ public class RegistrationActivity extends AppCompatActivity {
     }
 
     public void createAccountButtonTapped(View view) {
-        String email = emailTextInputLayout.getEditText().getText().toString();
+        final String email = emailTextInputLayout.getEditText().getText().toString();
         String password = passwordTextInputLayout.getEditText().getText().toString();
         final String region = regionTextInputLayout.getEditText().getText().toString();
 
@@ -76,6 +76,7 @@ public class RegistrationActivity extends AppCompatActivity {
 
                                     HashMap<String, Object> result = new HashMap<>();
                                     result.put("username", user);
+                                    result.put("email", email);
                                     result.put("region", region);
                                     result.put("token", token);
 
