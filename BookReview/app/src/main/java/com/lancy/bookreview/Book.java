@@ -12,6 +12,7 @@ public class Book implements Parcelable {
     public String mISBN;
     public String mISBN13;
     public String mDescription;
+    public String mReviews;
 
     @Override
     public int describeContents() {
@@ -28,6 +29,7 @@ public class Book implements Parcelable {
         dest.writeString(this.mISBN);
         dest.writeString(this.mISBN13);
         dest.writeString(this.mDescription);
+        dest.writeString(this.mReviews);
     }
 
     public Book() {
@@ -42,6 +44,7 @@ public class Book implements Parcelable {
         this.mISBN = in.readString();
         this.mISBN13 = in.readString();
         this.mDescription = in.readString();
+        this.mReviews = in.readString();
     }
 
     public static final Parcelable.Creator<Book> CREATOR = new Parcelable.Creator<Book>() {

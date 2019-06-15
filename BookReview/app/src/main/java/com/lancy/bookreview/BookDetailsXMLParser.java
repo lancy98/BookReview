@@ -51,6 +51,9 @@ public class BookDetailsXMLParser {
                 case "description":
                     book.mDescription = parser.nextText();
                     break;
+                case "reviews_widget":
+                    book.mReviews = parser.nextText();
+                    break;
             }
         }
 

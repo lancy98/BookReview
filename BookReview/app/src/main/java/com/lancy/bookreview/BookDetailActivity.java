@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -22,6 +23,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
 
 public class BookDetailActivity extends ProgressActivity
         implements NetworkRequest.NetworkResponse, BookDetailsXMLParser.BookDetailsXMLParserCompletion {
@@ -30,6 +34,11 @@ public class BookDetailActivity extends ProgressActivity
     private Button mBottomLeftButton;
     private Button mBottomRightButton;
     private Book mBook;
+    private TextView mBookNameTextView;
+    private TextView mAuthorNameTextView;
+    private ImageView mBookImageView;
+    private ArrayList<ImageView> starImageViews = new ArrayList<>();
+
     private NetworkRequest mNetworkRequest;
     private BookDetailsXMLParser mBookDetailsXMLParser;
     private TextView mBookDescriptionTextView;
@@ -40,10 +49,7 @@ public class BookDetailActivity extends ProgressActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_detail);
 
-        mBottomLeftButton = findViewById(R.id.bottomLeftButton);
-        mBottomRightButton = findViewById(R.id.bottomRightButton);
-        mProgressBar = findViewById(R.id.progressBar);
-        mBookDescriptionTextView = findViewById(R.id.bookDescriptionTextView);
+        getUIComponentsReferences();
 
         mAuth = FirebaseAuth.getInstance();
         mBook = getIntent().getExtras().getParcelable("book");
@@ -61,9 +67,57 @@ public class BookDetailActivity extends ProgressActivity
         }
     }
 
+    private void getUIComponentsReferences() {
+        mProgressBar = findViewById(R.id.progressBar);
+        mBottomLeftButton = findViewById(R.id.bottomLeftButton);
+        mBottomRightButton = findViewById(R.id.bottomRightButton);
+        mBookNameTextView = findViewById(R.id.bookNameTextView);
+        mAuthorNameTextView = findViewById(R.id.authorNameTextView);
+        mBookImageView = findViewById(R.id.bookImageView);
+
+        starImageViews.add((ImageView) findViewById(R.id.firstStarImageView));
+        starImageViews.add((ImageView) findViewById(R.id.secondStarImageView));
+        starImageViews.add((ImageView) findViewById(R.id.thirdStarImageView));
+        starImageViews.add((ImageView) findViewById(R.id.fourthStarImageView));
+        starImageViews.add((ImageView) findViewById(R.id.fifthStarImageView));
+    }
+
+    private void updateDataIntoUIComponents() {
+        Picasso.get().load(mBook.mImageLink).into(mBookImageView);
+        mBookNameTextView.setText(mBook.mName);
+        mAuthorNameTextView.setText("by " + mBook.mAuthorName);
+
+       double ratings = Double.parseDouble(mBook.mAverageRatings);
+       int baseStars = (int) Math.floor(ratings);
+       ratings = Math.ceil(Math.floor(ratings / 0.5) * 0.5) - baseStars;
+
+       for (int i = 0; i < baseStars; i++) {
+           starImageViews.get(i).setImageResource(R.drawable.ic_star);
+       }
+
+       if (ratings == 1) {
+           starImageViews.get(baseStars).setImageResource(R.drawable.ic_star_half);
+       }
+    }
+
+    public void descriptionButtonClicked(View view) {
+        Intent BookDescriptionActivityIntent =
+                new Intent(this, BookDescriptionActivity.class);
+        BookDescriptionActivityIntent.putExtra("book", mBook);
+        startActivity(BookDescriptionActivityIntent);
+    }
+
+    public void reviewsButtonClicked(View view) {
+        Intent ReviewsActivityIntent =
+                new Intent(this, ReviewsActivity.class);
+        ReviewsActivityIntent.putExtra("book", mBook);
+        startActivity(ReviewsActivityIntent);
+    }
+
     public void bottomLeftButtonTapped(View view) {
         if (hasUserLoggedIn()) {
-            Intent availableSellersActivity = new Intent(this, AvailableSellersActivity.class);
+            Intent availableSellersActivity =
+                    new Intent(this, AvailableSellersActivity.class);
             availableSellersActivity.putExtra("book", mBook);
             startActivity(availableSellersActivity);
         } else {
@@ -74,11 +128,14 @@ public class BookDetailActivity extends ProgressActivity
 
     public void bottomRightButtonTapped(View view) {
         if (hasUserLoggedIn()) {
-            Intent bookSellingActivity = new Intent(this, BookSellingActivity.class);
+            Intent bookSellingActivity =
+                    new Intent(this, BookSellingActivity.class);
             bookSellingActivity.putExtra("book", mBook);
             startActivity(bookSellingActivity);
         } else {
-            Intent registrationIntent = new Intent(this, RegistrationActivity.class);
+            Intent registrationIntent =
+                    new Intent(this,
+                    RegistrationActivity.class);
             startActivity(registrationIntent);
         }
     }
@@ -95,13 +152,14 @@ public class BookDetailActivity extends ProgressActivity
 
     @Override
     public void networkResponse(String url, String responseString, VolleyError error) {
-        mBookDetailsXMLParser = new BookDetailsXMLParser(mBook, responseString, this);
+        mBookDetailsXMLParser = new BookDetailsXMLParser(mBook,
+                responseString, this);
     }
 
     @Override
     public void parsingCompleted(boolean success, String errorString) {
         if (success) {
-            mBookDescriptionTextView.setText(mBook.mDescription);
+            updateDataIntoUIComponents();
             CheckIfTheUserAlreadySellingThisBook();
         }
         hideProgressUI();

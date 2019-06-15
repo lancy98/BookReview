@@ -1,17 +1,13 @@
 package com.lancy.bookreview;
 
-import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.widget.ImageView;
+
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -156,10 +152,18 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void getUserDatabaseReference() {
-        userDatabaseReference = FirebaseDatabase.getInstance().getReference().child("user").child(firebaseUser().getUid());
+        FirebaseUser firebaseUser = firebaseUser();
+        if (firebaseUser != null && firebaseUser.getUid() != null) {
+            userDatabaseReference = FirebaseDatabase.getInstance().
+                    getReference().child("user").child(firebaseUser().getUid());
+        }
     }
 
     private void getUserImage() {
+        if (userDatabaseReference == null) {
+            return;
+        }
+
         userDatabaseReference.child("image").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -167,7 +171,8 @@ public class MainActivity extends AppCompatActivity
                 if (imagePath != null) {
                     View headerView = navigationView.getHeaderView(0);
                     CircleImageView imageView = headerView.findViewById(R.id.profileImageView);
-                    Drawable drawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_person, null);
+                    Drawable drawable = ResourcesCompat.getDrawable(getResources(),
+                            R.drawable.ic_person, null);
                     Picasso.get().load(imagePath)
                             .placeholder(drawable)
                             .fit()
@@ -184,6 +189,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void getUserData() {
+        if (userDatabaseReference == null) {
+            return;
+        }
+
         userDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

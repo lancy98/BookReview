@@ -101,7 +101,9 @@ public class AvailableSellersActivity extends ProgressActivity
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         sellersRecyclerView.setLayoutManager(layoutManager);
 
-        sellerRecyclerAdapter = new SellerRecyclerAdapter(this, availableSellers, this);
+        sellerRecyclerAdapter =
+                new SellerRecyclerAdapter(this,
+                        availableSellers, this);
         sellersRecyclerView.setAdapter(sellerRecyclerAdapter);
     }
 
