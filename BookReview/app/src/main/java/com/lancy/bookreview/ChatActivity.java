@@ -85,6 +85,7 @@ public class ChatActivity extends AppCompatActivity {
                 }
 
                 chatRecyclerAdaptor = new ChatRecyclerAdaptor(ChatActivity.this, chatMessages);
+                chatRecyclerAdaptor.sellerID = seller.sellerUserID;
                 chatRecyclerView.setAdapter(chatRecyclerAdaptor);
             }
 

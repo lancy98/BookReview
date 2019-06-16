@@ -10,12 +10,15 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseUser;
+
 import java.util.ArrayList;
 
 public class ChatRecyclerAdaptor
         extends RecyclerView.Adapter<ChatRecyclerAdaptor.ViewHolder> {
     private ArrayList<Chat> chatMessages;
     private Context context;
+    public String sellerID;
 
     public ChatRecyclerAdaptor(Context context, ArrayList<Chat> messages) {
         this.context = context;
@@ -34,12 +37,17 @@ public class ChatRecyclerAdaptor
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+        final Chat chat = chatMessages.get(i);
+        boolean isOurMessage = (sellerID != chat.from);
 
         LayoutInflater inflater = LayoutInflater.from(context);
-        View view = inflater.inflate(R.layout.item_chat_list, viewGroup, false);
+        View view = inflater.inflate(isOurMessage ?
+                        R.layout.item_my_message_list : R.layout.item_their_message_list,
+                viewGroup, false);
 
         ViewHolder viewHolder = new ViewHolder(view);
         return viewHolder;
+
     }
 
     @Override
