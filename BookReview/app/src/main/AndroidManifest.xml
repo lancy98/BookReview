@@ -12,7 +12,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ReviewsActivity"></activity>
+        <activity android:name=".UsersChatListActivity"></activity>
+        <activity android:name=".ReviewsActivity" />
         <activity android:name=".BookDescriptionActivity" />
         <activity android:name=".WishlistFragment" />
         <activity android:name=".SearchActivity" />

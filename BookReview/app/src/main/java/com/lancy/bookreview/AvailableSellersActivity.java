@@ -18,6 +18,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AvailableSellersActivity extends ProgressActivity
         implements SellerRecyclerAdapter.RecyclerViewSelection {
@@ -79,6 +81,28 @@ public class AvailableSellersActivity extends ProgressActivity
     private void updateUserDatabase() {
         mDatabase.child("user").child(userID())
                 .child("wishlist").child(mBook.mISBN).setValue("-")
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            updateBookDatabase();
+                        } else {
+                            showToast("There was problem with the server");
+                        }
+                    }
+                });
+    }
+
+    private void updateBookDatabase() {
+        Map bookInformation = new HashMap();
+        bookInformation.put("mName", mBook.mName);
+        bookInformation.put("mImageLink", mBook.mImageLink);
+        bookInformation.put("mAuthorName", mBook.mAuthorName);
+        bookInformation.put("mAverageRatings", mBook.mAverageRatings);
+
+        mDatabase.child("book")
+                .child(mBook.mISBN)
+                .setValue(bookInformation)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {

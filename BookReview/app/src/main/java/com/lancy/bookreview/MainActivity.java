@@ -99,16 +99,23 @@ public class MainActivity extends AppCompatActivity
                 }
                 break;
             case R.id.main_wishlist_button:
-                openFragment(new WishlistFragment());
+                SellAndWishlistFragment wishlistFragment =
+                        new SellAndWishlistFragment();
+                wishlistFragment.configure(SellAndWishlistFragment.ScreenType.ScreenTypeWishlist);
+                openFragment(wishlistFragment);
+
                 break;
             case R.id.main_sell_button:
-                openFragment(new SellFragment());
+                SellAndWishlistFragment sellFragment = new SellAndWishlistFragment();
+                sellFragment.configure(SellAndWishlistFragment.ScreenType.ScreenTypeSell);
+                openFragment(sellFragment);
                 break;
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
+
 
     private void openFragment(Fragment activity) {
         getSupportFragmentManager().beginTransaction()
@@ -197,6 +204,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 user = dataSnapshot.getValue(User.class);
+                User.setCurrentUser(user);
                 updateUserInfo();
             }
 

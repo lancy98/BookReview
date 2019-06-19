@@ -26,7 +26,7 @@ import java.util.Map;
 public class ChatActivity extends AppCompatActivity {
 
     private Book book;
-    private BookSeller seller;
+    private String userID;
     private DatabaseReference databaseChatReference;
     private ArrayList<Chat> chatMessages;
     private ChatRecyclerAdaptor chatRecyclerAdaptor;
@@ -58,18 +58,28 @@ public class ChatActivity extends AppCompatActivity {
     private void getDataFromPreviousActivity() {
         Bundle extras = getIntent().getExtras();
         book = extras.getParcelable("book");
-        seller = extras.getParcelable("seller");
+
+        userID = extras.getString("userID");
+
+        if (userID == null) {
+            BookSeller seller = extras.getParcelable("seller");
+            userID = seller.sellerUserID;
+        }
     }
 
     private void getDatabaseReference() {
-        if (seller.sellerUserID.compareTo(UserInterfaceHelper.userID()) > 0) {
-            String chat_id = seller.sellerUserID + "_" + UserInterfaceHelper.userID();
+        if (userID.compareTo(UserInterfaceHelper.userID()) > 0) {
+            String chat_id = userID + "_" + UserInterfaceHelper.userID();
             databaseChatReference = FirebaseDatabase.getInstance().getReference()
                     .child("chat").child(book.mISBN).child(chat_id);
         } else {
-            String chat_id = seller.sellerUserID + "_" + UserInterfaceHelper.userID();
-            databaseChatReference = FirebaseDatabase.getInstance().getReference()
-                    .child("chat").child(book.mISBN).child(chat_id);
+            String chat_id = userID + "_" + UserInterfaceHelper.userID();
+            databaseChatReference = FirebaseDatabase
+                    .getInstance()
+                    .getReference()
+                    .child("chat")
+                    .child(book.mISBN)
+                    .child(chat_id);
         }
     }
 
@@ -85,7 +95,7 @@ public class ChatActivity extends AppCompatActivity {
                 }
 
                 chatRecyclerAdaptor = new ChatRecyclerAdaptor(ChatActivity.this, chatMessages);
-                chatRecyclerAdaptor.sellerID = seller.sellerUserID;
+                chatRecyclerAdaptor.userID = userID;
                 chatRecyclerView.setAdapter(chatRecyclerAdaptor);
             }
 
@@ -117,7 +127,7 @@ public class ChatActivity extends AppCompatActivity {
 
         chat.put("message", message);
         chat.put("from", UserInterfaceHelper.userID());
-        chat.put("to", seller.sellerUserID);
+        chat.put("to", userID);
         chat.put("timestamp", System.currentTimeMillis());
 
         return chat;

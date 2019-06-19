@@ -108,15 +108,36 @@ public class BookSellingActivity extends ProgressActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    showToast("Database updated sucess");
+                    updateBookDatabase();
                 } else {
                     showToast("There was problem with the server");
                 }
-
-                hideProgressUI();
-                finish();
             }
         });
+    }
+
+    private void updateBookDatabase() {
+        Map bookInformation = new HashMap();
+        bookInformation.put("mName", mBook.mName);
+        bookInformation.put("mImageLink", mBook.mImageLink);
+        bookInformation.put("mAuthorName", mBook.mAuthorName);
+        bookInformation.put("mAverageRatings", mBook.mAverageRatings);
+
+        mDatabase.child("book")
+                .child(mBook.mISBN)
+                .setValue(bookInformation)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                        } else {
+                            showToast("There was problem with the server");
+                        }
+
+                        hideProgressUI();
+                        finish();
+                    }
+                });
     }
 
     private void showToast(String text) {

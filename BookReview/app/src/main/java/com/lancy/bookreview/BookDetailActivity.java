@@ -176,7 +176,10 @@ public class BookDetailActivity extends ProgressActivity
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
         String userUID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        mDatabase.child("sell").child(mBook.mISBN).child(userUID).addValueEventListener(new ValueEventListener() {
+        mDatabase.child("sell")
+                .child(mBook.mISBN)
+                .child(userUID)
+                .addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String value = dataSnapshot.getValue(String.class);

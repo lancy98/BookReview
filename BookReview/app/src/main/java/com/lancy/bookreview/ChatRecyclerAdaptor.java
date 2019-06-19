@@ -18,7 +18,7 @@ public class ChatRecyclerAdaptor
         extends RecyclerView.Adapter<ChatRecyclerAdaptor.ViewHolder> {
     private ArrayList<Chat> chatMessages;
     private Context context;
-    public String sellerID;
+    public String userID;
 
     public ChatRecyclerAdaptor(Context context, ArrayList<Chat> messages) {
         this.context = context;
@@ -38,7 +38,7 @@ public class ChatRecyclerAdaptor
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         final Chat chat = chatMessages.get(i);
-        boolean isOurMessage = (sellerID != chat.from);
+        boolean isOurMessage = (userID != chat.from);
 
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(isOurMessage ?
