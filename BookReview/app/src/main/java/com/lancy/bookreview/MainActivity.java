@@ -1,5 +1,6 @@
 package com.lancy.bookreview;
 
+import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -9,6 +10,7 @@ import android.view.View;
 
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -32,7 +34,8 @@ import com.squareup.picasso.Picasso;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener,
+        LoginFragment.LoginHandlerInterface {
 
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
@@ -54,7 +57,6 @@ public class MainActivity extends AppCompatActivity
 
         navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        updateLoginLogoutButton();
 
         ActionBarDrawerToggle toggle;
         toggle = new ActionBarDrawerToggle(this,
@@ -64,8 +66,6 @@ public class MainActivity extends AppCompatActivity
                 R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
-
-        updateUserInfo();
 
         View headerView = navigationView.getHeaderView(0);
         headerView.setOnClickListener(new View.OnClickListener() {
@@ -82,7 +82,13 @@ public class MainActivity extends AppCompatActivity
 
         getUserDatabaseReference();
         getUserData();
-        getUserImage();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        updateLoginInfo();
     }
 
     @Override
@@ -95,7 +101,9 @@ public class MainActivity extends AppCompatActivity
                 if (userLoggedIn()) {
                     signOut();
                 } else {
-                    openFragment(new LoginActivity());
+                    LoginFragment fragment = new LoginFragment();
+                    fragment.handler = this;
+                    openFragment(fragment);
                 }
                 break;
             case R.id.main_wishlist_button:
@@ -150,9 +158,24 @@ public class MainActivity extends AppCompatActivity
 
     private void signOut() {
         FirebaseAuth.getInstance().signOut();
+        updateLoginInfo();
+    }
+
+    private void updateLoginInfo() {
+        resetUserImage();
         updateLoginLogoutButton();
         updateUserInfo();
+        getUserImage();
     }
+
+    private void resetUserImage() {
+        View headerView = navigationView.getHeaderView(0);
+        CircleImageView imageView = headerView.findViewById(R.id.profileImageView);
+        Drawable drawable = ResourcesCompat.getDrawable(getResources(),
+                R.drawable.ic_person, null);
+        imageView.setImageDrawable(drawable);
+    }
+
 
     private FirebaseUser firebaseUser() {
         return FirebaseAuth.getInstance().getCurrentUser();
@@ -223,5 +246,34 @@ public class MainActivity extends AppCompatActivity
 
     public void hideProgressUI() {
         linearHeaderProgress.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void signInCompleted(boolean success) {
+        if (success) {
+            updateUserInfo();
+            updateLoginLogoutButton();
+            openSearchFragment();
+        }
+    }
+
+    @Override
+    public void hideProgressView() {
+        hideProgressUI();
+    }
+
+    @Override
+    public void showProgressView() {
+        showProgressUI();
+    }
+
+    @Override
+    public Activity getCurrentActivity() {
+        return this;
     }
 }

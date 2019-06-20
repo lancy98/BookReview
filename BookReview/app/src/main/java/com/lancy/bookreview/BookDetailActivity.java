@@ -57,6 +57,11 @@ public class BookDetailActivity extends ProgressActivity
         loadBookInformation();
 
         mBottomRightButton.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
 
         if (hasUserLoggedIn()) {
             mBottomLeftButton.setText("Wishlist");
