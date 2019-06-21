@@ -67,9 +67,12 @@ public class AccountInformationFragment extends Fragment {
 
         addSaveButtonOnClickListener();
         addImageClickListener();
-        getUserDatabaseReference();
-        getUserData();
-        getUserImage();
+
+        if (UserInterfaceHelper.hasUserLoggedIn()) {
+            getUserDatabaseReference();
+            getUserData();
+            getUserImage();
+        }
 
         return view;
     }
@@ -132,7 +135,11 @@ public class AccountInformationFragment extends Fragment {
     }
 
     private String userID() {
-        return FirebaseAuth.getInstance().getCurrentUser().getUid();
+        if (UserInterfaceHelper.hasUserLoggedIn()) {
+            return FirebaseAuth.getInstance().getCurrentUser().getUid();
+        }
+
+        return null;
     }
 
     private void getUserDatabaseReference() {

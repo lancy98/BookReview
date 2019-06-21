@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SearchActivity">
+    tools:context=".SearchFragment">
 
     <View
         android:id="@+id/searchBackgroundView"
@@ -41,7 +41,6 @@
         android:layout_marginTop="5dp"
         android:layout_marginEnd="10dp"
         android:background="@drawable/search_button"
-        android:onClick="searchButtonTapped"
         app:layout_constraintEnd_toStartOf="@+id/cameraImageButton"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_search" />
@@ -53,7 +52,6 @@
         android:layout_marginTop="5dp"
         android:layout_marginEnd="10dp"
         android:background="@drawable/search_button"
-        android:onClick="cameraButtonTapped"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_camera" />

@@ -1,8 +1,17 @@
 package com.lancy.bookreview;
 
+import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,6 +29,7 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,19 +39,46 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.single.PermissionListener;
 import com.squareup.picasso.Picasso;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        LoginFragment.LoginHandlerInterface {
+        LoginFragment.LoginHandlerInterface,
+        SearchFragment.SearchFragmentHandlerInterface {
+
+    private static final int Image_Capture_Code = 1001;
 
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private LinearLayout linearHeaderProgress;
     private DatabaseReference userDatabaseReference;
     private User user;
+
+    private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Extract data included in the Intent
+            String title = intent.getStringExtra("title");
+            String body = intent.getStringExtra("body");
+
+            // Show the notification alert.
+            new SweetAlertDialog(MainActivity.this)
+                    .setTitleText(title)
+                    .setContentText(body)
+                    .setConfirmText("Dismiss")
+                    .show();
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,8 +108,10 @@ public class MainActivity extends AppCompatActivity
         headerView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openFragment(new AccountInformationFragment());
-                drawerLayout.closeDrawer(Gravity.LEFT, true);
+                if (UserInterfaceHelper.hasUserLoggedIn()) {
+                    openFragment(new AccountInformationFragment());
+                    drawerLayout.closeDrawer(Gravity.LEFT, true);
+                }
             }
         });
 
@@ -89,6 +128,17 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
 
         updateLoginInfo();
+
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(messageReceiver,
+                new IntentFilter("Firebase Notification"));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this)
+                .unregisterReceiver(messageReceiver);
     }
 
     @Override
@@ -125,9 +175,9 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    private void openFragment(Fragment activity) {
+    private void openFragment(Fragment fragment) {
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, activity).commit();
+                .replace(R.id.fragment_container, fragment).commit();
     }
 
     public void updateLoginLogoutButton() {
@@ -237,7 +287,41 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void openSearchFragment() {
-        openFragment(new SearchActivity());
+        SearchFragment searchFragment = new SearchFragment();
+        searchFragment.handler = this;
+        openFragment(searchFragment);
+    }
+
+    public void showCamera() {
+        Dexter.withActivity(this)
+                .withPermission(Manifest.permission.CAMERA)
+                .withListener(new PermissionListener() {
+                    @Override public void onPermissionGranted(PermissionGrantedResponse response) {
+                        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                        startActivityForResult(cameraIntent, Image_Capture_Code);
+                    }
+
+                    @Override public void onPermissionDenied(PermissionDeniedResponse response) { }
+
+                    @Override public void onPermissionRationaleShouldBeShown(PermissionRequest permission,
+                                                                             PermissionToken token) { }
+
+                }).check();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == Image_Capture_Code) {
+            if (resultCode == RESULT_OK) {
+                Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+
+                SearchFragment searchFragment =  (SearchFragment )
+                        getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+                searchFragment.convertImageToTextAndLoadBooks(bitmap);
+            }
+        }
     }
 
     public void showProgressUI() {
@@ -256,8 +340,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void signInCompleted(boolean success) {
         if (success) {
-            updateUserInfo();
-            updateLoginLogoutButton();
+            updateLoginInfo();
             openSearchFragment();
         }
     }

@@ -28,6 +28,11 @@ public class UserInterfaceHelper {
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
+    public static boolean hasUserLoggedIn() {
+        return FirebaseAuth.getInstance().getCurrentUser() != null;
+    }
+
+
     public static String userID() {
         return FirebaseAuth.getInstance().getCurrentUser().getUid();
     }

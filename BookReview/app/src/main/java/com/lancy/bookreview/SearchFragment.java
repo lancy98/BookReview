@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -34,7 +35,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import static android.app.Activity.RESULT_OK;
 
-public class SearchActivity extends Fragment
+public class SearchFragment extends Fragment
         implements BookSearchRecyclerAdapter.RecyclerViewSelection,
         NetworkRequest.NetworkResponse, BookList.BookListParsingCallback {
 
@@ -44,7 +45,7 @@ public class SearchActivity extends Fragment
     private NetworkRequest mNetworkRequest;
     private BookList mBookList;
     private EditText mEditText;
-    private static final int Image_Capture_Code = 1001;
+    public SearchFragmentHandlerInterface handler;
 
     @Nullable
     @Override
@@ -53,12 +54,34 @@ public class SearchActivity extends Fragment
 
         countryRecyclerView = view.findViewById(R.id.bookSearchRecyclerView);
         mEditText = view.findViewById(R.id.editText);
+        ImageButton searchImageButton = view.findViewById(R.id.searchImageButton);
+        searchImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadBooks(mEditText.getText().toString());
+            }
+        });
+
+        ImageButton cameraImageButton = view.findViewById(R.id.cameraImageButton);
+        cameraImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (handler != null) {
+                    handler.showCamera();
+                }
+            }
+        });
+
         mEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 loadBooks(v.getText().toString());
-                InputMethodManager inputManager = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                inputManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                InputMethodManager inputManager =
+                        (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputManager.hideSoftInputFromWindow(getActivity()
+                                .getCurrentFocus()
+                                .getWindowToken(),
+                        InputMethodManager.HIDE_NOT_ALWAYS);
                 return true;
             }
         });
@@ -66,16 +89,8 @@ public class SearchActivity extends Fragment
         return view;
     }
 
-    public void cameraButtonTapped(View view) {
-        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(cameraIntent, Image_Capture_Code);
-    }
 
-    public void searchButtonTapped(View view) {
-        loadBooks(mEditText.getText().toString());
-    }
-
-    private void convertImageToTextAndLoadBooks(Bitmap bitmap) {
+    public void convertImageToTextAndLoadBooks(Bitmap bitmap) {
         FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmap);
 
         FirebaseVisionTextRecognizer detector = FirebaseVision.getInstance()
@@ -135,15 +150,7 @@ public class SearchActivity extends Fragment
         ((MainActivity) getActivity()).hideProgressUI();
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == Image_Capture_Code) {
-            if (resultCode == RESULT_OK) {
-                Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-                convertImageToTextAndLoadBooks(bitmap);
-            }
-        }
+    public interface SearchFragmentHandlerInterface {
+        public void showCamera();
     }
 }

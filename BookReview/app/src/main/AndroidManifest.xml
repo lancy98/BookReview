@@ -17,7 +17,7 @@
         <activity android:name=".ReviewsActivity" />
         <activity android:name=".BookDescriptionActivity" />
         <activity android:name=".WishlistFragment" />
-        <activity android:name=".SearchActivity" />
+        <activity android:name=".SearchFragment" />
         <activity android:name=".ChatActivity" />
         <activity android:name=".AvailableSellersActivity" />
         <activity android:name=".BookSellingActivity" />
