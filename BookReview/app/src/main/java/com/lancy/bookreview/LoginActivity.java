@@ -5,14 +5,20 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
+
+import com.roger.catloadinglibrary.CatLoadingView;
 
 import java.util.Currency;
 
 public class LoginActivity
         extends AppCompatActivity
         implements  LoginFragment.LoginHandlerInterface {
+
+    CatLoadingView mView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,11 +35,13 @@ public class LoginActivity
             fragmentTransaction.replace(android.R.id.content, fragment);
             fragmentTransaction.commit();
         }
+
+        mView = new CatLoadingView();
     }
 
     @Override
     public void showToast(String message) {
-
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -51,12 +59,12 @@ public class LoginActivity
 
     @Override
     public void hideProgressView() {
-
+        mView.dismiss();
     }
 
     @Override
     public void showProgressView() {
-
+        mView.show(getSupportFragmentManager(), "");
     }
 
 }

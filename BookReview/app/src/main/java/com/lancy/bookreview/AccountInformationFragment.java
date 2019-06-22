@@ -68,13 +68,17 @@ public class AccountInformationFragment extends Fragment {
         addSaveButtonOnClickListener();
         addImageClickListener();
 
+        updateUserInformation();
+
+        return view;
+    }
+
+    private void updateUserInformation() {
         if (UserInterfaceHelper.hasUserLoggedIn()) {
             getUserDatabaseReference();
             getUserData();
             getUserImage();
         }
-
-        return view;
     }
 
     private void addSaveButtonOnClickListener() {

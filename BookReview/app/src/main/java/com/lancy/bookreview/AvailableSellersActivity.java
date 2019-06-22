@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
+
 public class AvailableSellersActivity extends ProgressActivity
         implements SellerRecyclerAdapter.RecyclerViewSelection {
     private RecyclerView sellersRecyclerView;
@@ -115,6 +117,20 @@ public class AvailableSellersActivity extends ProgressActivity
     }
 
     private void sellerInformationFetched() {
+
+        if (availableSellers.size() == 0) {
+            new SweetAlertDialog(AvailableSellersActivity.this)
+                    .setTitleText("Hi there!")
+                    .setContentText("This book has been added to your wishlist. Currently there are no sellers available for this book.")
+                    .setConfirmButton("OK", new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sweetAlertDialog) {
+                            finish();
+                        }
+                    })
+                    .show();
+        }
+
         hideProgressUI();
         configureRecyclerView();
     }

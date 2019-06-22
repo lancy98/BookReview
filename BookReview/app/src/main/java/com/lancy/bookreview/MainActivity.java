@@ -45,6 +45,7 @@ import com.karumi.dexter.listener.PermissionDeniedResponse;
 import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
+import com.roger.catloadinglibrary.CatLoadingView;
 import com.squareup.picasso.Picasso;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
@@ -59,7 +60,7 @@ public class MainActivity extends AppCompatActivity
 
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
-    private LinearLayout linearHeaderProgress;
+    private CatLoadingView catLoadingView = new CatLoadingView();
     private DatabaseReference userDatabaseReference;
     private User user;
 
@@ -84,8 +85,6 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        linearHeaderProgress = findViewById(R.id.linearHeaderProgress);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -147,26 +146,14 @@ public class MainActivity extends AppCompatActivity
             case R.id.main_search_button:
                 openSearchFragment();
                 break;
-            case R.id.main_login_logout_button:
-                if (userLoggedIn()) {
-                    signOut();
-                } else {
-                    LoginFragment fragment = new LoginFragment();
-                    fragment.handler = this;
-                    openFragment(fragment);
-                }
-                break;
             case R.id.main_wishlist_button:
-                SellAndWishlistFragment wishlistFragment =
-                        new SellAndWishlistFragment();
-                wishlistFragment.configure(SellAndWishlistFragment.ScreenType.ScreenTypeWishlist);
-                openFragment(wishlistFragment);
-
+                handleWishlistButtonTap();
                 break;
             case R.id.main_sell_button:
-                SellAndWishlistFragment sellFragment = new SellAndWishlistFragment();
-                sellFragment.configure(SellAndWishlistFragment.ScreenType.ScreenTypeSell);
-                openFragment(sellFragment);
+                handleSellButtonTap();
+                break;
+            case R.id.main_login_logout_button:
+                handleLoginLogoutButtonTap();
                 break;
         }
 
@@ -174,6 +161,46 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    private void handleSellButtonTap() {
+        if (UserInterfaceHelper.hasUserLoggedIn()) {
+            SellAndWishlistFragment sellFragment = new SellAndWishlistFragment();
+            sellFragment.configure(SellAndWishlistFragment.ScreenType.ScreenTypeSell);
+            openFragment(sellFragment);
+        } else {
+            // Show the notification alert.
+            new SweetAlertDialog(MainActivity.this)
+                    .setTitleText("Sign In")
+                    .setContentText("Please sign in to use this feature")
+                    .setConfirmText("Dismiss")
+                    .show();
+        }
+    }
+
+    private void handleWishlistButtonTap() {
+        if (UserInterfaceHelper.hasUserLoggedIn()) {
+            SellAndWishlistFragment wishlistFragment =
+                    new SellAndWishlistFragment();
+            wishlistFragment.configure(SellAndWishlistFragment.ScreenType.ScreenTypeWishlist);
+            openFragment(wishlistFragment);
+        } else {
+            // Show the notification alert.
+            new SweetAlertDialog(MainActivity.this)
+                    .setTitleText("Sign In")
+                    .setContentText("Please sign in to use this feature")
+                    .setConfirmText("Dismiss")
+                    .show();
+        }
+    }
+
+    private void handleLoginLogoutButtonTap() {
+        if (userLoggedIn()) {
+            signOut();
+        } else {
+            LoginFragment fragment = new LoginFragment();
+            fragment.handler = this;
+            openFragment(fragment);
+        }
+    }
 
     private void openFragment(Fragment fragment) {
         getSupportFragmentManager().beginTransaction()
@@ -208,7 +235,15 @@ public class MainActivity extends AppCompatActivity
 
     private void signOut() {
         FirebaseAuth.getInstance().signOut();
+        userDatabaseReference = null;
         updateLoginInfo();
+
+       Fragment fragment = getSupportFragmentManager()
+               .findFragmentById(R.id.fragment_container);
+
+       if (!(fragment instanceof SearchFragment)) {
+           openSearchFragment();
+       }
     }
 
     private void updateLoginInfo() {
@@ -216,6 +251,7 @@ public class MainActivity extends AppCompatActivity
         updateLoginLogoutButton();
         updateUserInfo();
         getUserImage();
+        getUserData();
     }
 
     private void resetUserImage() {
@@ -325,11 +361,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void showProgressUI() {
-        linearHeaderProgress.setVisibility(View.VISIBLE);
+        catLoadingView.show(getSupportFragmentManager(), "");
     }
 
     public void hideProgressUI() {
-        linearHeaderProgress.setVisibility(View.GONE);
+        catLoadingView.dismiss();
     }
 
     @Override
@@ -340,6 +376,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void signInCompleted(boolean success) {
         if (success) {
+            getUserDatabaseReference();
             updateLoginInfo();
             openSearchFragment();
         }

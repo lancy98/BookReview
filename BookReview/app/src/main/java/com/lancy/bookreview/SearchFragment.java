@@ -11,29 +11,21 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
-import android.provider.MediaStore;
+
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.volley.VolleyError;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.ml.vision.FirebaseVision;
-import com.google.firebase.ml.vision.common.FirebaseVisionImage;
-import com.google.firebase.ml.vision.text.FirebaseVisionText;
-import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer;
 
-import com.google.firebase.auth.FirebaseAuth;
+import java.lang.ref.WeakReference;
 
-import static android.app.Activity.RESULT_OK;
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class SearchFragment extends Fragment
         implements BookSearchRecyclerAdapter.RecyclerViewSelection,
@@ -46,6 +38,7 @@ public class SearchFragment extends Fragment
     private BookList mBookList;
     private EditText mEditText;
     public SearchFragmentHandlerInterface handler;
+    private TextRecognizer textRecognizer;
 
     @Nullable
     @Override
@@ -75,6 +68,7 @@ public class SearchFragment extends Fragment
         mEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                ((MainActivity) getActivity()).showProgressUI();
                 loadBooks(v.getText().toString());
                 InputMethodManager inputManager =
                         (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -91,34 +85,47 @@ public class SearchFragment extends Fragment
 
 
     public void convertImageToTextAndLoadBooks(Bitmap bitmap) {
-        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmap);
+        ((MainActivity) getActivity()).showProgressUI();
 
-        FirebaseVisionTextRecognizer detector = FirebaseVision.getInstance()
-                .getOnDeviceTextRecognizer();
-        detector.processImage(image)
-                .addOnSuccessListener(new OnSuccessListener<FirebaseVisionText>() {
-                    @Override
-                    public void onSuccess(FirebaseVisionText firebaseVisionText) {
-                        String text = firebaseVisionText.getText();
-                        String searchText = text.replaceAll(System.lineSeparator(), " ");
-                        loadBooks(searchText);
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
+        final WeakReference<SearchFragment> searchFragmentWeakReference = new WeakReference<>(this);
+
+        textRecognizer = new TextRecognizer(getActivity(), bitmap, new TextRecognizer.Completion() {
             @Override
-            public void onFailure(@NonNull Exception e) {
-                e.printStackTrace();
+            public void recognizedText(boolean success, String text) {
+                searchFragmentWeakReference.get().handleTextRecognition(success, text);
             }
         });
     }
 
+    private void handleTextRecognition(boolean success, String searchText) {
+        if (success) {
+            mEditText.setText(searchText.toLowerCase());
+            loadBooks(searchText);
+        } else {
+            new SweetAlertDialog(getActivity())
+                    .setTitleText("Oops..")
+                    .setContentText("Something went wrong at the server end")
+                    .setConfirmText("OK")
+                    .show();
+            ((MainActivity) getActivity()).hideProgressUI();
+        }
+    }
+
+
     private void loadBooks(String searchText) {
         if (searchText == null || searchText.length() == 0) {
+            ((MainActivity) getActivity()).hideProgressUI();
+
+            new SweetAlertDialog(getActivity())
+                    .setTitleText("Oops..")
+                    .setContentText("Unfortunately there is no text to search")
+                    .setConfirmText("OK")
+                    .show();
+
             return;
         }
 
-        ((MainActivity) getActivity()).showProgressUI();
-
-        searchText = searchText.replace(" ", "%20");
+        searchText = searchText.replace(" ", "+");
         String url = "https://www.goodreads.com/search/index.xml?key=RP1SC8DhEPLIxNC1NwA9g&q=" + searchText;
 
         mNetworkRequest = new NetworkRequest(getActivity(), url, this);
