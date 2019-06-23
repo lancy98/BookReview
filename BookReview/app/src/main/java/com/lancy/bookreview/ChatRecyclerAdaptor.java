@@ -71,16 +71,4 @@ public class ChatRecyclerAdaptor
             view = itemView;
         }
     }
-
-    public static class ViewHolder0 extends RecyclerView.ViewHolder {
-        public TextView messageTextView;
-        public View view;
-
-        public ViewHolder0(View itemView) {
-            super(itemView);
-
-            messageTextView = itemView.findViewById(R.id.messageTextView);
-            view = itemView;
-        }
-    }
 }
