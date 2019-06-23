@@ -17,6 +17,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.roger.catloadinglibrary.CatLoadingView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,11 +34,16 @@ public class UsersChatListActivity
     private RecyclerView recyclerView;
     private UsersListRecyclerAdapter adapter;
     private ArrayList<User> users = new ArrayList<>();
+    private CatLoadingView catLoadingView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_users_chat_list);
+
+        catLoadingView = new CatLoadingView();
+        catLoadingView.show(getSupportFragmentManager(), "");
+        catLoadingView.setCanceledOnTouchOutside(false);
 
         recyclerView = findViewById(R.id.chatListRecyclerView);
         book = getIntent().getExtras().getParcelable("book");
@@ -80,6 +86,11 @@ public class UsersChatListActivity
     }
 
     private void loadData() {
+        if (catLoadingView != null) {
+            catLoadingView.dismiss();
+            catLoadingView = null;
+        }
+
         recyclerView.setHasFixedSize(true);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);

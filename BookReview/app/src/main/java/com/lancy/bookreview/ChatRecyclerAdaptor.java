@@ -34,26 +34,28 @@ public class ChatRecyclerAdaptor
         return chatMessages.size();
     }
 
+    @Override
+    public int getItemViewType(int position) {
+        final Chat chat = chatMessages.get(position);
+        boolean isOtherUserMessage = userID.equals(chat.from);
+        return isOtherUserMessage ? 1 : 0;
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        final Chat chat = chatMessages.get(i);
-        boolean isOurMessage = (userID != chat.from);
-
         LayoutInflater inflater = LayoutInflater.from(context);
-        View view = inflater.inflate(isOurMessage ?
-                        R.layout.item_my_message_list : R.layout.item_their_message_list,
+        View view = inflater.inflate((i == 0) ?
+                        R.layout.item_my_message_list : R.layout.item_their_message_list  ,
                 viewGroup, false);
 
         ViewHolder viewHolder = new ViewHolder(view);
         return viewHolder;
-
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
         final Chat chat = chatMessages.get(i);
-
         viewHolder.messageTextView.setText(chat.message);
     }
 
@@ -63,6 +65,18 @@ public class ChatRecyclerAdaptor
         public View view;
 
         public ViewHolder(View itemView) {
+            super(itemView);
+
+            messageTextView = itemView.findViewById(R.id.messageTextView);
+            view = itemView;
+        }
+    }
+
+    public static class ViewHolder0 extends RecyclerView.ViewHolder {
+        public TextView messageTextView;
+        public View view;
+
+        public ViewHolder0(View itemView) {
             super(itemView);
 
             messageTextView = itemView.findViewById(R.id.messageTextView);

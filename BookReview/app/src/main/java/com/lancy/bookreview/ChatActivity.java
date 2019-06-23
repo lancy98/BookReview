@@ -18,6 +18,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.roger.catloadinglibrary.CatLoadingView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +33,7 @@ public class ChatActivity extends AppCompatActivity {
     private ChatRecyclerAdaptor chatRecyclerAdaptor;
     private RecyclerView chatRecyclerView;
     private EditText messageEditText;
+    private CatLoadingView catLoadingView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +47,10 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void linkUIElements() {
+        catLoadingView = new CatLoadingView();
+        catLoadingView.show(getSupportFragmentManager(), "");
+        catLoadingView.setCanceledOnTouchOutside(false);
+
         chatMessages = new ArrayList<>();
 
         chatRecyclerView = findViewById(R.id.chatRecyclerView);
@@ -69,7 +75,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private void getDatabaseReference() {
         if (userID.compareTo(UserInterfaceHelper.userID()) > 0) {
-            String chat_id = userID + "_" + UserInterfaceHelper.userID();
+            String chat_id = UserInterfaceHelper.userID() + "_" +  userID;
             databaseChatReference = FirebaseDatabase.getInstance().getReference()
                     .child("chat").child(book.mISBN).child(chat_id);
         } else {
@@ -92,6 +98,11 @@ public class ChatActivity extends AppCompatActivity {
                 for (DataSnapshot chatSnapshot: dataSnapshot.getChildren()) {
                     Chat chat = chatSnapshot.getValue(Chat.class);
                     chatMessages.add(chat);
+                }
+
+                if (catLoadingView != null) {
+                    catLoadingView.dismiss();
+                    catLoadingView = null;
                 }
 
                 chatRecyclerAdaptor = new ChatRecyclerAdaptor(ChatActivity.this, chatMessages);
