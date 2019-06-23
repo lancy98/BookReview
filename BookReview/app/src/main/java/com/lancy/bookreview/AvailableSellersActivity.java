@@ -162,6 +162,7 @@ public class AvailableSellersActivity extends AppCompatActivity
 
         chatActivityIntent.putExtra("book", mBook);
         chatActivityIntent.putExtra("seller", seller);
+        chatActivityIntent.putExtra("username", seller.sellerName);
 
         startActivity(chatActivityIntent);
     }

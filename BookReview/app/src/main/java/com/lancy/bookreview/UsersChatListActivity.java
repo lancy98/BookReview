@@ -173,6 +173,7 @@ public class UsersChatListActivity
         Intent chatIntent = new Intent(UsersChatListActivity.this, ChatActivity.class);
         chatIntent.putExtra("book", book);
         chatIntent.putExtra("userID", user.userID);
+        chatIntent.putExtra("username", user.username);
         startActivity(chatIntent);
     }
 }
