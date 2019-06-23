@@ -68,6 +68,11 @@ public class SearchFragment extends Fragment
         mEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (event != null &&
+                        event.getAction() != KeyEvent.ACTION_DOWN) {
+                    return false;
+                }
+
                 ((MainActivity) getActivity()).showProgressUI();
                 loadBooks(v.getText().toString());
                 InputMethodManager inputManager =

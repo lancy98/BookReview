@@ -1,6 +1,7 @@
 package com.lancy.bookreview;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -16,6 +17,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.roger.catloadinglibrary.CatLoadingView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,24 +25,27 @@ import java.util.Map;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
-public class AvailableSellersActivity extends ProgressActivity
+public class AvailableSellersActivity extends AppCompatActivity
         implements SellerRecyclerAdapter.RecyclerViewSelection {
     private RecyclerView sellersRecyclerView;
     private DatabaseReference mDatabase;
     private Book mBook;
     private ArrayList<BookSeller> availableSellers = new ArrayList<>();
     private SellerRecyclerAdapter sellerRecyclerAdapter;
+    private CatLoadingView catLoadingView = new CatLoadingView();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_available_sellers);
-        mProgressBar = findViewById(R.id.progressBar);
         sellersRecyclerView = findViewById(R.id.sellersRecyclerView);
         mBook = getIntent().getExtras().getParcelable("book");
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
-        showProgressUI();
+        catLoadingView.setCanceledOnTouchOutside(false);
+        catLoadingView.show(getSupportFragmentManager(), "");
+
         updateWishlistDatabase();
     }
 
@@ -131,7 +136,7 @@ public class AvailableSellersActivity extends ProgressActivity
                     .show();
         }
 
-        hideProgressUI();
+        catLoadingView.dismiss();
         configureRecyclerView();
     }
 

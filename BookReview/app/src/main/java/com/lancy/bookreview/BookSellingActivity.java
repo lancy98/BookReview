@@ -25,18 +25,21 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.roger.catloadinglibrary.CatLoadingView;
 import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class BookSellingActivity extends ProgressActivity {
+public class BookSellingActivity extends AppCompatActivity {
     private DatabaseReference mDatabase;
     private Book mBook;
     private TextView mBookNameTextView;
     private TextView mAuthorNameTextView;
     private EditText mPriceEditText;
     private ImageView mBookImageView;
+    private CatLoadingView catLoadingView = new CatLoadingView();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +48,7 @@ public class BookSellingActivity extends ProgressActivity {
         mBook = getIntent().getExtras().getParcelable("book");
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
+        catLoadingView.setCanceledOnTouchOutside(false);
         getUIComponentsReferences();
         loadDataIntoUI();
     }
@@ -56,7 +60,6 @@ public class BookSellingActivity extends ProgressActivity {
     }
 
     private void getUIComponentsReferences() {
-        mProgressBar = findViewById(R.id.progressBar);
         mBookNameTextView = findViewById(R.id.bookNameTextView);
         mAuthorNameTextView = findViewById(R.id.authorNameTextView);
         mPriceEditText = findViewById(R.id.priceEditText);
@@ -69,7 +72,7 @@ public class BookSellingActivity extends ProgressActivity {
             return;
         }
 
-        showProgressUI();
+        catLoadingView.show(getSupportFragmentManager(), "");
         updateSellDatabase();
     }
 
@@ -94,7 +97,7 @@ public class BookSellingActivity extends ProgressActivity {
                 if (task.isSuccessful()) {
                     updateUserDatabase();
                 } else {
-                    hideProgressUI();
+                    catLoadingView.dismiss();
                     showToast("There was problem with the server");
                 }
             }
@@ -134,7 +137,7 @@ public class BookSellingActivity extends ProgressActivity {
                             showToast("There was problem with the server");
                         }
 
-                        hideProgressUI();
+                        catLoadingView.dismiss();
                         finish();
                     }
                 });

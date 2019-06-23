@@ -23,11 +23,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.roger.catloadinglibrary.CatLoadingView;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
-public class BookDetailActivity extends ProgressActivity
+public class BookDetailActivity extends AppCompatActivity
         implements NetworkRequest.NetworkResponse, BookDetailsXMLParser.BookDetailsXMLParserCompletion {
 
     private FirebaseAuth mAuth;
@@ -43,12 +44,15 @@ public class BookDetailActivity extends ProgressActivity
     private BookDetailsXMLParser mBookDetailsXMLParser;
     private TextView mBookDescriptionTextView;
     private DatabaseReference mDatabase;
+    private CatLoadingView catLoadingView = new CatLoadingView();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_detail);
 
+        catLoadingView.setCanceledOnTouchOutside(false);
         getUIComponentsReferences();
 
         mAuth = FirebaseAuth.getInstance();
@@ -73,7 +77,6 @@ public class BookDetailActivity extends ProgressActivity
     }
 
     private void getUIComponentsReferences() {
-        mProgressBar = findViewById(R.id.progressBar);
         mBottomLeftButton = findViewById(R.id.bottomLeftButton);
         mBottomRightButton = findViewById(R.id.bottomRightButton);
         mBookNameTextView = findViewById(R.id.bookNameTextView);
@@ -146,7 +149,7 @@ public class BookDetailActivity extends ProgressActivity
     }
 
     private void loadBookInformation() {
-        showProgressUI();
+        catLoadingView.show(getSupportFragmentManager(), "");
         String authorName = mBook.mAuthorName.replace(" ", "%20");
         String bookName = mBook.mName.replace(" ", "%20");
         String url = "https://www.goodreads.com/book/title.xml?author="
@@ -167,7 +170,7 @@ public class BookDetailActivity extends ProgressActivity
             updateDataIntoUIComponents();
             CheckIfTheUserAlreadySellingThisBook();
         }
-        hideProgressUI();
+        catLoadingView.dismiss();
     }
 
     private boolean hasUserLoggedIn() {

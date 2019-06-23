@@ -2,6 +2,9 @@ package com.lancy.bookreview;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -18,6 +21,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
+import com.roger.catloadinglibrary.CatLoadingView;
 
 import java.util.HashMap;
 
@@ -29,11 +33,14 @@ public class RegistrationActivity extends AppCompatActivity {
     private TextInputLayout regionTextInputLayout;
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
+    private CatLoadingView catLoadingView = new CatLoadingView();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registration);
+
+        catLoadingView.setCanceledOnTouchOutside(false);
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
@@ -55,6 +62,8 @@ public class RegistrationActivity extends AppCompatActivity {
 
         final String user = username;
 
+        catLoadingView.show(getSupportFragmentManager(), "");
+
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -68,6 +77,7 @@ public class RegistrationActivity extends AppCompatActivity {
                                 public void onComplete(@NonNull Task<InstanceIdResult> task) {
                                     if (!task.isSuccessful()) {
                                         Log.w(TAG, "getInstanceId failed", task.getException());
+                                        catLoadingView.dismiss();
                                         return;
                                     }
 
@@ -85,7 +95,14 @@ public class RegistrationActivity extends AppCompatActivity {
                                             .setValue(result).addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
+                                            catLoadingView.dismiss();
                                             if (task.isSuccessful()) {
+
+                                                Intent intent = new Intent("User Data Changed");
+                                                LocalBroadcastManager
+                                                        .getInstance(RegistrationActivity.this)
+                                                        .sendBroadcast(intent);
+
                                                 finish();
                                             } else {
 
@@ -95,6 +112,7 @@ public class RegistrationActivity extends AppCompatActivity {
                                 }
                             });
                         } else {
+                            catLoadingView.dismiss();
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
                             Toast.makeText(RegistrationActivity.this, task.getException().getLocalizedMessage(),

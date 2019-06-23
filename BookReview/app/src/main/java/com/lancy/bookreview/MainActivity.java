@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity
     private DatabaseReference userDatabaseReference;
     private User user;
 
-    private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver firebaseNotificationReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             // Extract data included in the Intent
@@ -80,6 +80,13 @@ public class MainActivity extends AppCompatActivity
         }
     };
 
+    private BroadcastReceiver userDataChangedMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateLoginInfo();
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +96,7 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        catLoadingView.setCanceledOnTouchOutside(false);
         drawerLayout = findViewById(R.id.draw_layout);
 
         navigationView = findViewById(R.id.nav_view);
@@ -118,8 +126,18 @@ public class MainActivity extends AppCompatActivity
             openSearchFragment();
         }
 
-        getUserDatabaseReference();
-        getUserData();
+        updateLoginInfo();
+
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(userDataChangedMessageReceiver,
+                        new IntentFilter("User Data Changed"));
+    }
+
+    @Override
+    protected void onDestroy() {
+        LocalBroadcastManager.getInstance(this)
+                .unregisterReceiver(userDataChangedMessageReceiver);
+        super.onDestroy();
     }
 
     @Override
@@ -129,7 +147,7 @@ public class MainActivity extends AppCompatActivity
         updateLoginInfo();
 
         LocalBroadcastManager.getInstance(this)
-                .registerReceiver(messageReceiver,
+                .registerReceiver(firebaseNotificationReceiver,
                 new IntentFilter("Firebase Notification"));
     }
 
@@ -137,7 +155,7 @@ public class MainActivity extends AppCompatActivity
     public void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(this)
-                .unregisterReceiver(messageReceiver);
+                .unregisterReceiver(firebaseNotificationReceiver);
     }
 
     @Override
@@ -247,6 +265,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void updateLoginInfo() {
+        getUserDatabaseReference();
         resetUserImage();
         updateLoginLogoutButton();
         updateUserInfo();

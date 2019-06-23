@@ -33,6 +33,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.roger.catloadinglibrary.CatLoadingView;
 import com.squareup.picasso.Picasso;
 import com.vansuita.pickimage.bean.PickResult;
 import com.vansuita.pickimage.bundle.PickSetup;
@@ -55,12 +56,14 @@ public class AccountInformationFragment extends Fragment {
     private CircleImageView circleImageView;
     private StorageReference mStorageRef;
     private Button saveButton;
+    private CatLoadingView catLoadingView = new CatLoadingView();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_account_information, container, false);
+        catLoadingView.setCanceledOnTouchOutside(false);
         usernameTextView = view.findViewById(R.id.usernameTextView);
         circleImageView = view.findViewById(R.id.profileImageView);
         saveButton = view.findViewById(R.id.saveButton);
@@ -68,6 +71,7 @@ public class AccountInformationFragment extends Fragment {
         addSaveButtonOnClickListener();
         addImageClickListener();
 
+        catLoadingView.show(getActivity().getSupportFragmentManager(), "");
         updateUserInformation();
 
         return view;
@@ -118,12 +122,7 @@ public class AccountInformationFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String imagePath = dataSnapshot.getValue(String.class);
                 if (imagePath != null) {
-                    Drawable drawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_person, null);
-                    Picasso.get().load(imagePath)
-                            .placeholder(drawable)
-                            .fit()
-                            .centerCrop()
-                            .into(circleImageView);
+                    updateImageInImageView(imagePath);
                 }
             }
 
@@ -134,8 +133,19 @@ public class AccountInformationFragment extends Fragment {
         });
     }
 
+    private void updateImageInImageView(String imagePath) {
+        Drawable drawable = ResourcesCompat
+                .getDrawable(getResources(), R.drawable.ic_person, null);
+        Picasso.get().load(imagePath)
+                .placeholder(drawable)
+                .fit()
+                .centerCrop()
+                .into(circleImageView);
+    }
+
     private void reloadUI() {
         usernameTextView.setText(user.username);
+        catLoadingView.dismiss();
     }
 
     private String userID() {
@@ -167,6 +177,8 @@ public class AccountInformationFragment extends Fragment {
     }
 
     private void uploadFile(Uri file) {
+        updateImageInImageView(file.toString());
+        catLoadingView.show(getActivity().getSupportFragmentManager(), "");
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
         StorageReference riversRef = mStorageRef.child("images/" + userID()+".jpg");
@@ -201,6 +213,7 @@ public class AccountInformationFragment extends Fragment {
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
+                catLoadingView.dismiss();
                 if (task.isSuccessful()) {
                     Log.i("Lancy", "updated user image");
                 } else {
@@ -211,10 +224,12 @@ public class AccountInformationFragment extends Fragment {
     }
 
     private void updateUsername(String username) {
+        catLoadingView.show(getActivity().getSupportFragmentManager(), "");
         userDatabaseReference.child("username").setValue(username)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
+                catLoadingView.dismiss();
                 if (task.isSuccessful()) {
                     Log.i("Lancy", "updated user name");
                 } else {
