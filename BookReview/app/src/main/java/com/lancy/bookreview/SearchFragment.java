@@ -46,6 +46,12 @@ public class SearchFragment extends Fragment
         View view = inflater.inflate(R.layout.activity_search, container, false);
 
         countryRecyclerView = view.findViewById(R.id.bookSearchRecyclerView);
+        countryRecyclerView.setHasFixedSize(true);
+
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+        countryRecyclerView.setLayoutManager(gridLayoutManager);
+
+
         mEditText = view.findViewById(R.id.editText);
         ImageButton searchImageButton = view.findViewById(R.id.searchImageButton);
         searchImageButton.setOnClickListener(new View.OnClickListener() {
@@ -151,13 +157,10 @@ public class SearchFragment extends Fragment
 
     @Override
     public void parsingCompleted() {
-        countryRecyclerView.setHasFixedSize(true);
-
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
-        countryRecyclerView.setLayoutManager(gridLayoutManager);
 
         mBookSearchRecyclerAdapter = new BookSearchRecyclerAdapter(getActivity(), mBookList, this);
         countryRecyclerView.setAdapter(mBookSearchRecyclerAdapter);
+        countryRecyclerView.invalidate();
 
         ((MainActivity) getActivity()).hideProgressUI();
     }
