@@ -15,6 +15,11 @@ public class BookListXMLParser {
     private BookListXMLParserCompletion mCompletionHandlerObject;
 
     public BookListXMLParser(String xmlString, BookListXMLParserCompletion handler) {
+
+        if (!checkIfXMLStringIsValid(xmlString, handler)) {
+            return;
+        }
+
         this.mCompletionHandlerObject = handler;
 
         try {
@@ -28,6 +33,18 @@ public class BookListXMLParser {
             Log.e("BookListXMLParser", e.getLocalizedMessage());
             mCompletionHandlerObject.parsingCompleted(null, e.getLocalizedMessage());
         }
+    }
+
+    private boolean checkIfXMLStringIsValid(String xmlString, BookListXMLParserCompletion handler) {
+        if (xmlString == null) {
+            handler.parsingCompleted(null, "Could not fetch data from internet");
+            return false;
+        } else if (xmlString.length() == 0) {
+            handler.parsingCompleted(null, "Unfortunately server has not returned any data");
+            return false;
+        }
+
+        return true;
     }
 
     private void startParsing(XmlPullParser parser)

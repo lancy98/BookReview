@@ -1,23 +1,17 @@
 package com.lancy.bookreview;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.PersistableBundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.volley.VolleyError;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -28,12 +22,14 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
+
 public class BookDetailActivity extends AppCompatActivity
         implements NetworkRequest.NetworkResponse, BookDetailsXMLParser.BookDetailsXMLParserCompletion {
 
     private FirebaseAuth mAuth;
-    private Button mBottomLeftButton;
-    private Button mBottomRightButton;
+    private Button wishlistButton;
+    private Button sellButton;
     private Book mBook;
     private TextView mBookNameTextView;
     private TextView mAuthorNameTextView;
@@ -60,7 +56,7 @@ public class BookDetailActivity extends AppCompatActivity
 
         loadBookInformation();
 
-        mBottomRightButton.setVisibility(View.VISIBLE);
+        sellButton.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -68,17 +64,17 @@ public class BookDetailActivity extends AppCompatActivity
         super.onResume();
 
         if (hasUserLoggedIn()) {
-            mBottomLeftButton.setText("Wishlist");
-            mBottomRightButton.setText("Sell");
+            wishlistButton.setText("Wishlist");
+            sellButton.setText("Sell");
         } else {
-            mBottomLeftButton.setText("Sign In");
-            mBottomRightButton.setText("Create Account");
+            wishlistButton.setText("Sign In");
+            sellButton.setText("Create Account");
         }
     }
 
     private void getUIComponentsReferences() {
-        mBottomLeftButton = findViewById(R.id.bottomLeftButton);
-        mBottomRightButton = findViewById(R.id.bottomRightButton);
+        wishlistButton = findViewById(R.id.wishlistButton);
+        sellButton = findViewById(R.id.sellButton);
         mBookNameTextView = findViewById(R.id.bookNameTextView);
         mAuthorNameTextView = findViewById(R.id.authorNameTextView);
         mBookImageView = findViewById(R.id.bookImageView);
@@ -122,19 +118,16 @@ public class BookDetailActivity extends AppCompatActivity
         startActivity(ReviewsActivityIntent);
     }
 
-    public void bottomLeftButtonTapped(View view) {
+    public void wishlistButtonTapped(View view) {
         if (hasUserLoggedIn()) {
-            Intent availableSellersActivity =
-                    new Intent(this, AvailableSellersActivity.class);
-            availableSellersActivity.putExtra("book", mBook);
-            startActivity(availableSellersActivity);
+            checkIfTheUserHasAlreadySellingTheBook();
         } else {
             Intent signInIntent = new Intent(this, LoginActivity.class);
             startActivity(signInIntent);
         }
     }
 
-    public void bottomRightButtonTapped(View view) {
+    public void sellButtonTapped(View view) {
         if (hasUserLoggedIn()) {
             Intent bookSellingActivity =
                     new Intent(this, BookSellingActivity.class);
@@ -168,35 +161,109 @@ public class BookDetailActivity extends AppCompatActivity
     public void parsingCompleted(boolean success, String errorString) {
         if (success) {
             updateDataIntoUIComponents();
-            CheckIfTheUserAlreadySellingThisBook();
+            checkIfTheUserHasAddedTheBookToWishlist();
+        } else {
+            catLoadingView.dismiss();
         }
-        catLoadingView.dismiss();
     }
 
     private boolean hasUserLoggedIn() {
         return (mAuth.getCurrentUser() != null);
     }
 
-    private void CheckIfTheUserAlreadySellingThisBook() {
+    private void checkIfTheUserHasAddedTheBookToWishlist() {
         if (!hasUserLoggedIn()) {
+            catLoadingView.dismiss();
             return;
         }
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
         String userUID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        mDatabase.child("sell")
+        mDatabase.child("wishlist")
                 .child(mBook.mISBN)
                 .child(userUID)
                 .addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot == null) {
+                    catLoadingView.dismiss();
+                    return;
+                }
+
                 String value = dataSnapshot.getValue(String.class);
-                mBottomRightButton.setVisibility((value != null) ? View.GONE: View.VISIBLE);
+                if (value != null && value.length() > 0) {
+                    wishlistButton.setText("Check Available Sellers");
+                    sellButton.setVisibility(View.GONE);
+                }
+
+                catLoadingView.dismiss();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
             }
         });
+    }
+
+    private void checkIfTheUserHasAlreadySellingTheBook() {
+        catLoadingView.show(getSupportFragmentManager(), "");
+
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        final String userUID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        mDatabase.child("sell")
+                .child(mBook.mISBN)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                        if (dataSnapshot == null) {
+                            catLoadingView.dismiss();
+                            return;
+                        } else if (dataSnapshot.hasChildren() == false) {
+                            catLoadingView.dismiss();
+                            return;
+                        }
+
+                        boolean isUserASeller = false;
+
+                        for (DataSnapshot childSnapshot: dataSnapshot.getChildren()) {
+                            BookSeller seller = childSnapshot.getValue(BookSeller.class);
+
+                            if (seller.sellerUserID.equals(userUID)) {
+                                isUserASeller = true;
+                                break;
+                            }
+                        }
+
+                        catLoadingView.dismiss();
+
+                        if (isUserASeller) {
+                            showUserAlreadySellingThisBookPopup();
+                        } else {
+                            showAvailableSellersActivity();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                    }
+                });
+    }
+
+    private void showUserAlreadySellingThisBookPopup() {
+        // Show the notification alert.
+        new SweetAlertDialog(this)
+                .setTitleText("Sorry")
+                .setContentText("You are already selling this book. Hence cannot be added to wishlist")
+                .setConfirmText("OK")
+                .show();
+    }
+
+    private void showAvailableSellersActivity() {
+        Intent availableSellersActivity =
+                new Intent(BookDetailActivity.this,
+                        AvailableSellersActivity.class);
+        availableSellersActivity.putExtra("book", mBook);
+        startActivity(availableSellersActivity);
     }
 }

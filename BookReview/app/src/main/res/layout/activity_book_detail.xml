@@ -16,36 +16,37 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <Button
-            android:id="@+id/bottomLeftButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="32dp"
-            android:background="@color/colorPrimary"
-            android:onClick="bottomLeftButtonTapped"
-            android:text="Button"
-            android:textColor="@color/colorTextAndIcon"
-            android:textSize="15sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/bottomRightButton"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <Button
-            android:id="@+id/bottomRightButton"
+            android:id="@+id/wishlistButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginEnd="24dp"
-            android:layout_marginBottom="32dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
             android:background="@color/colorPrimary"
-            android:onClick="bottomRightButtonTapped"
+            android:onClick="wishlistButtonTapped"
             android:text="Button"
             android:textColor="@color/colorTextAndIcon"
             android:textSize="15sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/bottomLeftButton" />
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <Button
+            android:id="@+id/sellButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            android:background="@color/colorPrimary"
+            android:onClick="sellButtonTapped"
+            android:text="Button"
+            android:textColor="@color/colorTextAndIcon"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toTopOf="@id/wishlistButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
 
         <Button
             android:id="@+id/reviewsButton"
@@ -56,10 +57,10 @@
             android:text="Tap here to view reviews"
             android:onClick="reviewsButtonClicked"
             android:textAllCaps="false"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/bottomRightButton"/>
+            app:layout_constraintBottom_toTopOf="@+id/sellButton"/>
 
         <Button
             android:id="@+id/descriptionButton"
@@ -70,7 +71,7 @@
             android:onClick="descriptionButtonClicked"
             android:textColor="@color/colorPrimary"
             android:textAllCaps="false"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toTopOf="@+id/reviewsButton"/>
@@ -83,8 +84,8 @@
             app:layout_constraintBottom_toTopOf="@id/descriptionButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp">
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp">
 
             <ImageView
                 android:id="@+id/firstStarImageView"
