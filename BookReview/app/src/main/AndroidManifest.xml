@@ -14,16 +14,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".LoginActivity"></activity>
-        <activity android:name=".UsersChatListActivity" />
-        <activity android:name=".ReviewsActivity" />
-        <activity android:name=".BookDescriptionActivity" />
+        <activity android:name=".userflow.LoginActivity"></activity>
+        <activity android:name=".chat.UsersChatListActivity" />
+        <activity android:name=".bookscreens.ReviewsActivity" />
+        <activity android:name=".bookscreens.BookDescriptionActivity" />
         <activity android:name=".WishlistFragment" />
-        <activity android:name=".SearchFragment" />
-        <activity android:name=".ChatActivity" />
-        <activity android:name=".AvailableSellersActivity" />
-        <activity android:name=".BookSellingActivity" />
-        <activity android:name=".BookDetailActivity" />
+        <activity android:name=".bookscreens.SearchFragment" />
+        <activity android:name=".chat.ChatActivity" />
+        <activity android:name=".wishlistandsell.AvailableSellersActivity" />
+        <activity android:name=".wishlistandsell.BookSellingActivity" />
+        <activity android:name=".bookscreens.BookDetailActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -41,10 +41,10 @@
             android:required="false" />
 
         <activity
-            android:name=".LoginFragment"
+            android:name=".userflow.LoginFragment"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".RegistrationActivity"
+            android:name=".userflow.RegistrationActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".MainActivity"
@@ -72,7 +72,7 @@
             android:value="ocr" />
 
         <service
-            android:name=".FCMInstanceIDService"
+            android:name=".firebase.FCMInstanceIDService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

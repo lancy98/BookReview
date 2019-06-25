@@ -2,13 +2,11 @@ package com.lancy.bookreview;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -18,7 +16,6 @@ import android.view.MenuItem;
 import android.view.View;
 
 import android.view.inputmethod.InputMethodManager;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,6 +43,12 @@ import com.karumi.dexter.listener.PermissionDeniedResponse;
 import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
+import com.lancy.bookreview.bookscreens.SearchFragment;
+import com.lancy.bookreview.helper.UserInterfaceHelper;
+import com.lancy.bookreview.model.User;
+import com.lancy.bookreview.userflow.AccountInformationFragment;
+import com.lancy.bookreview.userflow.LoginFragment;
+import com.lancy.bookreview.wishlistandsell.SellAndWishlistFragment;
 import com.roger.catloadinglibrary.CatLoadingView;
 import com.squareup.picasso.Picasso;
 
